@@ -31,6 +31,15 @@
   cursor: pointer;
 }
 
+.popup__button:disabled {
+  background-color: #fff;
+  color: gray;
+  border: 1px solid gray;
+  border-radius: 2px;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
 .popup__close {
   width: 35px;
   height: 35px;
@@ -115,6 +124,25 @@
   left: 0;
   top: calc(100% + 10px);
   margin: 0;
+}
+
+.popup__error {
+  display: none;
+  font-size: 12px;
+  color: #ff0000;
+  padding-top: 5px;
+}
+
+.popup__error_visible {
+  display: block;
+}
+
+.popup__input_type_error {
+  border-color: red;
+}
+
+.popup__field {
+  position: relative;
 }
 
 @media screen and (max-width: 544px) {

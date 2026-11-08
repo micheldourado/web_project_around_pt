@@ -1,4 +1,4 @@
-let initialCards = [
+const initialCards = [
   {
     name: "Vale de Yosemite",
     link: "https://practicum-content.s3.us-west-1.amazonaws.com/web-code/moved_yosemite.jpg",
@@ -45,8 +45,6 @@ const cardTemplate = document
 const newCardBtn = document.querySelector(".profile__add-button");
 const newCardModal = document.querySelector("#new-card-popup");
 const newCardCloseBtn = newCardModal.querySelector(".popup__close");
-const cardTitle = document.querySelector(".card__title");
-const cardImage = document.querySelector(".card__image");
 const cardInputTitle = newCardModal.querySelector(
   ".popup__input_type_card-name",
 );
@@ -57,12 +55,31 @@ const imagePopup = imageModal.querySelector(".popup__image");
 const imageCaption = imageModal.querySelector(".popup__caption");
 const imagePopupClose = imageModal.querySelector(".popup__close");
 
+const editProfileForm = document.getElementById("edit-profile-form");
+const inputsProfile = editProfileForm.querySelectorAll(
+  ".popup__input, .popup__input_type_name, .popup__input_type_description",
+);
+
+const submitProfileButton = editModal.querySelector(".popup__button");
+
+const newCardForm = document.getElementById("new-card-form");
+const inputsNewCard = newCardForm.querySelectorAll(
+  ".popup__input, popup__input_type_card-name, popup__input_type_url",
+);
+
+const submitNewCardButton = newCardModal.querySelector(".popup__button");
+
 function openModal(modalElement) {
   modalElement.classList.add("popup_is-opened");
+  currentEscHandler = escKeyPressed(modalElement);
 }
 
 function closeModal(modalElement) {
   modalElement.classList.remove("popup_is-opened");
+  if (currentEscHandler) {
+    document.removeEventListener("keydown", currentEscHandler);
+    currentEscHandler = null; // Limpa a referência
+  }
 }
 
 function fillProfileForm() {
@@ -75,7 +92,7 @@ function handleOpenEditModal() {
   openModal(editModal);
 }
 
-let profileForm = editModal.querySelector(".popup__form");
+const profileForm = editModal.querySelector(".popup__form");
 
 function handleProfileFormSubmit(evt) {
   evt.preventDefault();
@@ -97,10 +114,7 @@ function handleCardImage(name, link) {
   openModal(imageModal);
 }
 
-function getCardElement(
-  name = "lugar sem nome",
-  link = "./images/placeholder.jpg",
-) {
+function getCardElement(name, link) {
   const cardElement = cardTemplate.cloneNode(true);
   const cardTitle = cardElement.querySelector(".card__title");
   const cardImage = cardElement.querySelector(".card__image");
@@ -114,7 +128,6 @@ function getCardElement(
   cardLikeBtn.addEventListener("click", (evt) => handleCardLike(evt));
   cardDelBtn.addEventListener("click", () => cardElement.remove());
   cardImage.addEventListener("click", () => handleCardImage(name, link));
-  imagePopupClose.addEventListener("click", () => closeModal(imageModal));
 
   return cardElement;
 }
@@ -124,7 +137,7 @@ function renderCard(name, link, container) {
   container.append(cardEl);
 }
 
-let cardForm = newCardModal.querySelector(".popup__form");
+const cardForm = newCardModal.querySelector(".popup__form");
 
 function handleCardFormSubmit(evt) {
   evt.preventDefault();
@@ -139,14 +152,90 @@ function handleCardFormSubmit(evt) {
   closeModal(newCardModal);
 }
 
-editProfileBtn.addEventListener("click", () => handleOpenEditModal());
+function showInputError(inputElement, errorMessage, form) {
+  const errorElement = form.querySelector(`.${inputElement.id}-error`);
+  inputElement.classList.add("popup__input_type_error");
+  errorElement.textContent = errorMessage;
+  errorElement.classList.add("popup__error_visible");
+}
+
+function hideInputError(inputElement, form) {
+  const errorElement = form.querySelector(`.${inputElement.id}-error`);
+  inputElement.classList.remove("popup__input_type_error");
+  errorElement.textContent = "";
+  errorElement.classList.remove("popup__error_active");
+}
+
+function toggleButtonState(button, inputs) {
+  const allValid = Array.from(inputs).every((input) => input.validity.valid);
+  button.disabled = !allValid;
+}
+
+function clickOutside(modalElement) {
+  function handleDocumentClick(evt) {
+    if (evt.target === modalElement) {
+      closeModal(modalElement);
+      document.removeEventListener("click", handleDocumentClick);
+    }
+  }
+
+  document.addEventListener("click", handleDocumentClick);
+}
+
+function escKeyPressed(modalElement) {
+  function handleEscClose(evt) {
+    if (evt.key === "Escape") {
+      closeModal(modalElement);
+      document.removeEventListener("keydown", handleEscClose);
+    }
+  }
+  document.addEventListener("keydown", handleEscClose);
+  return handleEscClose;
+}
+
+editProfileBtn.addEventListener("click", (evt) => {
+  evt.stopPropagation();
+  handleOpenEditModal();
+  clickOutside(editModal);
+  escKeyPressed(editModal);
+});
 editProfileCloseBtn.addEventListener("click", () => closeModal(editModal));
 profileForm.addEventListener("submit", (evt) => handleProfileFormSubmit(evt));
 
-newCardBtn.addEventListener("click", () => openModal(newCardModal));
+newCardBtn.addEventListener("click", (evt) => {
+  evt.stopPropagation();
+  openModal(newCardModal);
+  clickOutside(newCardModal);
+  escKeyPressed(newCardModal);
+});
+
 newCardCloseBtn.addEventListener("click", () => closeModal(newCardModal));
 cardForm.addEventListener("submit", (evt) => handleCardFormSubmit(evt));
 
+imagePopupClose.addEventListener("click", () => closeModal(imageModal));
+
 initialCards.forEach((card) => {
   renderCard(card.name, card.link, cardsContainer);
+});
+
+inputsProfile.forEach((input) => {
+  input.addEventListener("input", () => {
+    if (!input.validity.valid) {
+      showInputError(input, input.validationMessage, editProfileForm);
+    } else {
+      hideInputError(input, editProfileForm);
+    }
+    toggleButtonState(submitProfileButton, inputsProfile);
+  });
+});
+
+inputsNewCard.forEach((input) => {
+  input.addEventListener("input", () => {
+    if (!input.validity.valid) {
+      showInputError(input, input.validationMessage, newCardForm);
+    } else {
+      hideInputError(input, newCardForm);
+    }
+    toggleButtonState(submitNewCardButton, inputsNewCard);
+  });
 });
