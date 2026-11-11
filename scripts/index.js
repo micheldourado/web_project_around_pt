@@ -56,22 +56,33 @@ const imageCaption = imageModal.querySelector(".popup__caption");
 const imagePopupClose = imageModal.querySelector(".popup__close");
 
 const editProfileForm = document.getElementById("edit-profile-form");
-const inputsProfile = editProfileForm.querySelectorAll(
-  ".popup__input, .popup__input_type_name, .popup__input_type_description",
-);
+const inputsProfile = editProfileForm.querySelectorAll(".popup__input");
+
+const profileForm = editModal.querySelector(".popup__form");
 
 const submitProfileButton = editModal.querySelector(".popup__button");
 
+const cardForm = newCardModal.querySelector(".popup__form");
+
 const newCardForm = document.getElementById("new-card-form");
-const inputsNewCard = newCardForm.querySelectorAll(
-  ".popup__input, popup__input_type_card-name, popup__input_type_url",
-);
+const inputsNewCard = newCardForm.querySelectorAll(".popup__input");
 
 const submitNewCardButton = newCardModal.querySelector(".popup__button");
+
+let currentEscHandler;
+
+function clearErrorsForm(formElement) {
+  const inputs = formElement.querySelectorAll(".popup__input");
+
+  inputs.forEach((inputElement) => {
+    hideInputError(inputElement, formElement);
+  });
+}
 
 function openModal(modalElement) {
   modalElement.classList.add("popup_is-opened");
   currentEscHandler = escKeyPressed(modalElement);
+  clickOutside(modalElement);
 }
 
 function closeModal(modalElement) {
@@ -88,11 +99,10 @@ function fillProfileForm() {
 }
 
 function handleOpenEditModal() {
+  clearErrorsForm(editProfileForm);
   fillProfileForm();
   openModal(editModal);
 }
-
-const profileForm = editModal.querySelector(".popup__form");
 
 function handleProfileFormSubmit(evt) {
   evt.preventDefault();
@@ -137,8 +147,6 @@ function renderCard(name, link, container) {
   container.append(cardEl);
 }
 
-const cardForm = newCardModal.querySelector(".popup__form");
-
 function handleCardFormSubmit(evt) {
   evt.preventDefault();
 
@@ -163,7 +171,7 @@ function hideInputError(inputElement, form) {
   const errorElement = form.querySelector(`.${inputElement.id}-error`);
   inputElement.classList.remove("popup__input_type_error");
   errorElement.textContent = "";
-  errorElement.classList.remove("popup__error_active");
+  errorElement.classList.remove("popup__error_visible");
 }
 
 function toggleButtonState(button, inputs) {
@@ -193,20 +201,14 @@ function escKeyPressed(modalElement) {
   return handleEscClose;
 }
 
-editProfileBtn.addEventListener("click", (evt) => {
-  evt.stopPropagation();
-  handleOpenEditModal();
-  clickOutside(editModal);
-  escKeyPressed(editModal);
-});
+editProfileBtn.addEventListener("click", () => handleOpenEditModal());
 editProfileCloseBtn.addEventListener("click", () => closeModal(editModal));
 profileForm.addEventListener("submit", (evt) => handleProfileFormSubmit(evt));
 
-newCardBtn.addEventListener("click", (evt) => {
-  evt.stopPropagation();
+newCardBtn.addEventListener("click", () => {
+  newCardForm.reset();
+  clearErrorsForm(newCardForm);
   openModal(newCardModal);
-  clickOutside(newCardModal);
-  escKeyPressed(newCardModal);
 });
 
 newCardCloseBtn.addEventListener("click", () => closeModal(newCardModal));
