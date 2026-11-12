@@ -102,6 +102,7 @@ function handleOpenEditModal() {
   clearErrorsForm(editProfileForm);
   fillProfileForm();
   openModal(editModal);
+  toggleButtonState(submitProfileButton, [inputName, inputDescription]);
 }
 
 function handleProfileFormSubmit(evt) {
@@ -207,6 +208,7 @@ profileForm.addEventListener("submit", (evt) => handleProfileFormSubmit(evt));
 
 newCardBtn.addEventListener("click", () => {
   newCardForm.reset();
+  toggleButtonState(submitNewCardButton, [cardInputTitle, cardInputLink]);
   clearErrorsForm(newCardForm);
   openModal(newCardModal);
 });
